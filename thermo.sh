@@ -30,10 +30,10 @@ update_last_seen() {
     # Send a notification if the thermostat was previously disconnected
     if [ -f "$STATUS_FILE" ]; then
         if [ "$(cat "$STATUS_FILE")" = "Disconnected" ]; then
-            echo "Thermostat is reconnected." | curl -d "$MESSAGE" ntfy.sh/$NTFY_TOPIC
+            curl -d "Thermostat is reconnected." ntfy.sh/$NTFY_TOPIC
         fi
     fi
-    echo "connected" > "$STATUS_FILE"
+    echo "Connected" > "$STATUS_FILE"
 }
 
 
@@ -46,7 +46,7 @@ if echo "$SCAN_RESULT" | grep -q "Cannot open MAC/Vendor file"; then
 fi
 
 # Proceed with checking for the thermostat's MAC address
-if echo "$SCAN_RESULT" | grep -q $THERMOSTAT_MAC; then
+if echo "$SCAN_RESULT" | grep -q "$THERMOSTAT_MAC"; then
     echo "Thermostat is connected."
     update_last_seen
 else
@@ -57,7 +57,7 @@ else
         ((attempt_count++))
         sleep 30 # Wait for 30 seconds before rescanning
         # Rescan the network for the thermostat's MAC address
-        if arp-scan --interface=$INTERFACE --localnet | grep -q $THERMOSTAT_MAC; then
+        if arp-scan --interface=$INTERFACE --localnet | grep -q "$THERMOSTAT_MAC"; then
             echo "Thermostat is reconnected."
             update_last_seen
             break
